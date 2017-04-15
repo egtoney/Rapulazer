@@ -3,8 +3,11 @@ import util
 import numpy as np
 from random import shuffle
 
-data_base = '/media/wsong/CDROM/'
-audio_base = data_base + 'Music/'
+import sys
+sys.path.append('../')
+import definition
+
+audio_base = definition.audio_base
 
 # Folders containing for sure rap, non-rap music
 nonrap_base = audio_base + 'nonrap/'
