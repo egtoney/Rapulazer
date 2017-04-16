@@ -204,6 +204,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         float[] result = { 0, 0, 0, 0 };
         for( int i=0 ; i<3 ; i++ ) {
             result[i] = (float) Math.sqrt(Math.pow(rainbow_colors[first][i], 2) + Math.pow(rainbow_colors[second][i], 2));
+//            result[i] = (float) (rainbow_colors[first][i] + rainbow_colors[second][i])/2f;
         }
 
         // Set alpha channel
@@ -418,7 +419,8 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
             if( shake_dy < 0 ) {
                 shake_dy /= 4;
             }
-            scale = (float) (0.8 + 0.2*Math.abs(Math.sin(running_bpm_count)));
+            float dead_zone = 0.7f;
+            scale = (float) (dead_zone + (1-dead_zone)*Math.abs(Math.sin(running_bpm_count)));
             rotation = (float) (13.0*Math.sin(running_bpm_count));
         }
 
@@ -449,20 +451,13 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         // Create instance array
         float[] instance_vbo = new float[(int) (6*(sections+1)*(sections+1))];
         float[] set_color = new float[4];
-        float[] frequency_amplitudes = new float[(int) sections+1];
+        double[] frequency_amplitudes = new double[(int) sections+1];
         int max_count = 100;
         // Get frequency graph
         if( mDataRef.data() != null ) {
-            int[] freq_count = mDataRef.data().freq_counts;
-
-            for( int i=0 ; i<freq_count.length ; i++ ) {
-                frequency_amplitudes[i] = (MAX_COUNT == 0) ? 1 : freq_count[i] / (float)MAX_COUNT;
-                if( frequency_amplitudes[i] > 1 ) {
-                    frequency_amplitudes[i] = 1;
-                }
-            }
+            frequency_amplitudes = mDataRef.data().freq_counts;
         }
-        float darkness_constant = 0.3f;
+        float darkness_constant = 0.4f;
         int i=0, j=0;
         for( float ty=top, py=0 ; ty<=bottom ; ty+=step_y ) {
             set_color = getRainbow( py );
@@ -477,9 +472,9 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
                 instance_vbo[i++] = set_color[2];
 
                 if( px > frequency_amplitudes[j] ){
-                    instance_vbo[i-1] -= Math.max(instance_vbo[i-1]-darkness_constant, 0);
-                    instance_vbo[i-2] -= Math.max(instance_vbo[i-2]-darkness_constant, 0);
-                    instance_vbo[i-3] -= Math.max(instance_vbo[i-3]-darkness_constant, 0);
+                    instance_vbo[i-1] = Math.max(instance_vbo[i-1]*darkness_constant, 0);
+                    instance_vbo[i-2] = Math.max(instance_vbo[i-2]*darkness_constant, 0);
+                    instance_vbo[i-3] = Math.max(instance_vbo[i-3]*darkness_constant, 0);
                 }
             }
             j++;
