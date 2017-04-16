@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.util.Arrays;
 
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatureExtractor;
@@ -61,7 +63,6 @@ public class AudioVisualizerService extends IntentService {
         Log.d("AudioVisualizerService", "Initialization starting");
         mVis = new Visualizer(0);
         mVis.setEnabled(false);
-        //mVis.setMeasurementMode(Visualizer.MEASUREMENT_MODE_PEAK_RMS);
 
         final int SAMPLING_RATE = Visualizer.getMaxCaptureRate();
 
@@ -84,17 +85,16 @@ public class AudioVisualizerService extends IntentService {
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
-                //visualizer.getMeasurementPeakRms(measurement);
-                Log.d("CATHACKS", String.format("%s PEAK: %d\tRMS: %d", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
+                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
-        }, SAMPLING_RATE, false, true);
+        }, SAMPLING_RATE, true, true);
 
         //These are all magic values, don't worry about it
         int sampleSizeInBits = 8;
         int channels = 1;
         TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
-                TarsosDSPAudioFormat.Encoding.PCM_SIGNED,
+                TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
                 SAMPLING_RATE,
                 sampleSizeInBits,
                 channels,

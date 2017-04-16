@@ -1,12 +1,16 @@
 package edu.thunderseethe.rapulazer.AudioLib;
 
 import android.media.audiofx.Visualizer;
+import android.util.Log;
+
 import be.tarsos.dsp.SilenceDetector;
-import be.tarsos.dsp.pitch.FastYin;
+import be.tarsos.dsp.beatroot.BeatRootOnsetEventHandler;
+import be.tarsos.dsp.onsets.ComplexOnsetDetector;
+import be.tarsos.dsp.pitch.McLeodPitchMethod;
 import be.tarsos.dsp.pitch.PitchDetector;
-import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter;
+import edu.thunderseethe.rapulazer.MainActivity;
 
 /**
  * Created by Cody on 4/15/2017.
@@ -18,6 +22,7 @@ public class AudioFeatureExtractor {
     private PitchDetector pitch_detector;
     private AndroidComplexOnsetDetector complex_onset_detector;
     private EnvelopeDetector envelope_detector;
+    private AndroidComplexOnsetDetector cd;
 
     private final float sample_rate;
     private final int buffer_size;
@@ -38,7 +43,7 @@ public class AudioFeatureExtractor {
         /**
          * Initialize the PitchDetector
          */
-        this.pitch_detector = new FastYin(sample_rate, buffer_size);
+        this.pitch_detector = new McLeodPitchMethod(sample_rate, buffer_size);
 
         /**
          * Initialize the ComplexOnsetDetector
@@ -72,7 +77,7 @@ public class AudioFeatureExtractor {
          * Check complex onset detector
          */
         if(!audio_features.is_silence)
-            audio_features.is_beat = this.complex_onset_detector.isBeat(f_buffer, sample_rate, 0, getTimestamp());
+            audio_features.is_beat = this.complex_onset_detector.isBeat(f_buffer, sample_rate, this.buffer_size);
         else
             audio_features.is_beat = false;
 
