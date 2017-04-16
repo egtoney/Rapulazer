@@ -3,4 +3,5 @@
     <string name="visualize_data">VisualizeDataIntent</string>
     <string name="start_visualize">StartVisualize</string>
     <string name="stop_visualize">StopVisualize</string>
+    <string name="rapulazer_wallpaper">Rapulizer Wallpaper</string>
 </resources>

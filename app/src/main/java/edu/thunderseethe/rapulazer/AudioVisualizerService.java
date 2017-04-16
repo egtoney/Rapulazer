@@ -2,21 +2,15 @@ package edu.thunderseethe.rapulazer;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.audiofx.Visualizer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
-import android.provider.MediaStore;
+
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.io.FileDescriptor;
-import java.util.Arrays;
 
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatureExtractor;
@@ -67,6 +61,7 @@ public class AudioVisualizerService extends IntentService {
         Log.d("AudioVisualizerService", "Initialization starting");
         mVis = new Visualizer(0);
         mVis.setEnabled(false);
+        //mVis.setMeasurementMode(Visualizer.MEASUREMENT_MODE_PEAK_RMS);
 
         final int SAMPLING_RATE = Visualizer.getMaxCaptureRate();
 
@@ -76,6 +71,8 @@ public class AudioVisualizerService extends IntentService {
         bundle.putInt("samplingRate", SAMPLING_RATE);
 
         int[] range = Visualizer.getCaptureSizeRange();
+
+        final Visualizer.MeasurementPeakRms measurement = new Visualizer.MeasurementPeakRms();
 
         mVis.setCaptureSize(range[0]);
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
@@ -88,7 +85,8 @@ public class AudioVisualizerService extends IntentService {
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
                 mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
-                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
+                //visualizer.getMeasurementPeakRms(measurement);
+                Log.d("CATHACKS", String.format("%s PEAK: %d\tRMS: %d", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
             }
         }, SAMPLING_RATE, false, true);
 

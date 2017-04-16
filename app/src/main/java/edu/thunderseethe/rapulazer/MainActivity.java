@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
     //private LocalBroadcastManager mBManager;
     //private DataRef<AudioFeatures> mAudioFeaturesRef;
     private boolean mBound = false;
-    private VisualizerGLRenderer mRenderer = new VisualizerGLRenderer(DataRef.<AudioFeatures>empty());
+    private VisualizerGLRenderer mRenderer;
     private AudioVisualizerService.AudioFeatureBinder mService;
 
     protected static String prettyPrintByteArray(byte[] bytes) {
@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mRenderer = new VisualizerGLRenderer(getApplicationContext(), DataRef.<AudioFeatures>empty());
         //final TextView fftText = (TextView)findViewById(R.id.fft_text);
         //final TextView waveformText = (TextView)findViewById(R.id.waveform_text);
 

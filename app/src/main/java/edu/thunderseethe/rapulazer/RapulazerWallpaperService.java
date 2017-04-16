@@ -15,7 +15,7 @@ import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
  * Created by thunderseethe on 4/16/17.
  */
 
-public abstract class RapulazerWallpaperService extends WallpaperService {
+public class RapulazerWallpaperService extends WallpaperService {
     public class GLEngine extends Engine {
         public class WallpaperGLSurfaceView extends GLSurfaceView {
             private static final String TAG = "RapulazerWallpaperGLSurfaceView";
@@ -42,14 +42,14 @@ public abstract class RapulazerWallpaperService extends WallpaperService {
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
 
-            mRenderer = new VisualizerGLRenderer(GLWallpaperService.this, DataRef.<AudioFeatures>empty());
+            mRenderer = new VisualizerGLRenderer(RapulazerWallpaperService.this, DataRef.<AudioFeatures>empty());
 
-            mGLView = new WallpaperGLSurfaceView(GLWallpaperService.this);
+            mGLView = new WallpaperGLSurfaceView(RapulazerWallpaperService.this);
             mGLView.setEGLContextClientVersion(3);
             mGLView.setPreserveEGLContextOnPause(true);
             mGLView.setRenderer(mRenderer);
 
-            bindService(new Intent(GLWallpaperService.this, AudioVisualizerService.class), mConnection, BIND_AUTO_CREATE);
+            bindService(new Intent(RapulazerWallpaperService.this, AudioVisualizerService.class), mConnection, BIND_AUTO_CREATE);
         }
 
         @Override
@@ -86,5 +86,10 @@ public abstract class RapulazerWallpaperService extends WallpaperService {
                 mBound = false;
             }
         };
+    }
+
+    @Override
+    public Engine onCreateEngine() {
+        return new GLEngine();
     }
 }

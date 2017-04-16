@@ -106,9 +106,9 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
             // Set attributes
             GLES30.glEnableVertexAttribArray( 0 );
-            GLES30.glVertexAttribPointer( 0, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 3*FLOAT_BYTES );
+            GLES30.glVertexAttribPointer( 0, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 0 );
             GLES30.glEnableVertexAttribArray( 1 );
-            GLES30.glVertexAttribPointer( 1, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 0 );
+            GLES30.glVertexAttribPointer( 1, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 3*FLOAT_BYTES );
 
             // Clear buffers
             GLES30.glBindBuffer( GLES30.GL_ARRAY_BUFFER, 0 );
