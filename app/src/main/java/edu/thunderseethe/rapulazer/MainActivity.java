@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
     private boolean mBound = false;
     private VisualizerGLRenderer mRenderer;
     private AudioVisualizerService.AudioFeatureBinder mService;
-    private final int BUCKETS = 20000;
+    private static final int BUCKETS = 16;
 
     protected static String prettyPrintByteArray(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -36,6 +36,18 @@ public class MainActivity extends Activity {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for(float f : floats) {
+            sb.append(" '");
+            sb.append(f);
+            sb.append("',");
+        }
+        sb.append(" ]");
+        return sb.toString();
+    }
+
+    public static String prettyPrintIntArray(int[] ints) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(float f : ints) {
             sb.append(" '");
             sb.append(f);
             sb.append("',");
