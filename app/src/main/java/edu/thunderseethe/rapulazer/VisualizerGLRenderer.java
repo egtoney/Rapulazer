@@ -455,7 +455,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         int max_count = 100;
         // Get frequency graph
         if( mDataRef.data() != null ) {
-            frequency_amplitudes = mDataRef.data().freq_counts;
+            frequency_amplitudes = Arrays.copyOf(mDataRef.data().freq_counts, frequency_amplitudes.length);
         }
         float darkness_constant = 0.4f;
         int i=0, j=0;

@@ -73,7 +73,7 @@ public class AudioVisualizerService extends IntentService {
         mVis.setEnabled(false);
         mVis.setMeasurementMode(Visualizer.MEASUREMENT_MODE_PEAK_RMS);
 
-        final int SAMPLING_RATE = (int)Math.round(Visualizer.getMaxCaptureRate() / 1.5);
+        final int SAMPLING_RATE = (int)Math.round(Visualizer.getMaxCaptureRate() / 1.0);
 
         final Bundle bundle = new Bundle();
         bundle.putByteArray("fft", new byte[]{});
