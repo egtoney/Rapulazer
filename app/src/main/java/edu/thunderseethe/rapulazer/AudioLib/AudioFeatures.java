@@ -14,6 +14,7 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 public class AudioFeatures {
     public boolean is_silence;
     public boolean is_beat;
+    public boolean is_percussion;
 
     /**
      * SPL is actually a ratio of the absolute, Sound Pressure and a reference level (usually the Threshold of Hearing,
@@ -35,9 +36,9 @@ public class AudioFeatures {
      * the pitch itself.
      */
     public PitchDetectionResult pitch_detection_result;
-
+    public int[] freq_counts;
 
     public String toString() {
-        return String.format(Locale.CANADA, "AudioFeature(%b, %b, %f, %f, %f)", is_silence, is_beat, sound_pressure_level, average_envelope, pitch_detection_result.getPitch());
+        return String.format(Locale.CANADA, "AudioFeature(%b, %b, %b, %f, %f, %f)", is_silence, is_beat, is_percussion, sound_pressure_level, average_envelope, pitch_detection_result.getPitch());
     }
 }

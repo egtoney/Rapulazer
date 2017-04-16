@@ -22,6 +22,7 @@ import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
 public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
     private DataRef<AudioFeatures> mDataRef;
+    private int MAX_COUNT = 0;
 
     public VisualizerGLRenderer(Context context, DataRef<AudioFeatures> mDataRef) {
         this.mContext = context;
@@ -30,6 +31,9 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
     public void updateRef(DataRef<AudioFeatures> _dataRef) {
         mDataRef = _dataRef;
+    }
+    public void setMaxCount(int n) {
+        MAX_COUNT = n;
     }
 
     private static final int FLOAT_BYTES = 4;

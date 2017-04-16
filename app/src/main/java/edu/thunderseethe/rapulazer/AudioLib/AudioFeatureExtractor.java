@@ -3,9 +3,12 @@ package edu.thunderseethe.rapulazer.AudioLib;
 import android.media.audiofx.Visualizer;
 import android.util.Log;
 
+import java.util.Arrays;
+
 import be.tarsos.dsp.SilenceDetector;
 import be.tarsos.dsp.beatroot.BeatRootOnsetEventHandler;
 import be.tarsos.dsp.onsets.ComplexOnsetDetector;
+import be.tarsos.dsp.onsets.OnsetHandler;
 import be.tarsos.dsp.pitch.McLeodPitchMethod;
 import be.tarsos.dsp.pitch.PitchDetector;
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
@@ -22,11 +25,12 @@ public class AudioFeatureExtractor {
     private PitchDetector pitch_detector;
     private AndroidComplexOnsetDetector complex_onset_detector;
     private EnvelopeDetector envelope_detector;
-    private AndroidComplexOnsetDetector cd;
+    private AndroidPercussionOnsetDetector percussion_onset_detector;
 
     private final float sample_rate;
     private final int buffer_size;
     private int bytes_processed = 0;
+    private int buckets = 5;
 
     private TarsosDSPAudioFloatConverter float_converter;
 
@@ -49,6 +53,7 @@ public class AudioFeatureExtractor {
          * Initialize the ComplexOnsetDetector
          */
         this.complex_onset_detector = new AndroidComplexOnsetDetector(buffer_size);
+        this.percussion_onset_detector = new AndroidPercussionOnsetDetector(sample_rate, buffer_size, 0);
 
         /**
          * Initialize the EnvelopeDetector
@@ -66,6 +71,7 @@ public class AudioFeatureExtractor {
          * Check silence detector
          */
         audio_features.is_silence = this.silence_detector.isSilence(f_buffer);
+
         audio_features.sound_pressure_level = this.silence_detector.currentSPL();
 
         /**
@@ -81,12 +87,47 @@ public class AudioFeatureExtractor {
         else
             audio_features.is_beat = false;
 
+        audio_features.is_percussion = this.percussion_onset_detector.process(f_buffer);
+
         /**
          * Check the envelope detector
          */
         audio_features.average_envelope = envelope_detector.calculateAverageEnvelope(f_buffer);
 
+        audio_features.freq_counts = frequency_counts(buffer, buckets);
+
         return audio_features;
+    }
+
+    public void setBuckets(int buckets) {
+        this.buckets = buckets;
+    }
+
+    private int[] frequency_counts(byte[] buffer, int n) {
+        int[] counts = new int[n];
+        Arrays.sort(buffer);
+        int range = buffer[buffer.length - 1] - buffer[0];
+        if(range == 0) {
+            counts[0] = buffer.length;
+            return counts;
+        }
+
+
+        /* dicks dicks dicks dicks
+         dicks dicks dicks dicks
+         dicks dicks dicks dicks
+        dicks dicks dicks dicks */
+
+        double bucket_size = (double)range / (n - 1);
+        int bucket = 1;
+        for(int i = 0; i < buffer.length; i += 1) {
+            if((buffer[i] - buffer[0]) > bucket * bucket_size) {
+                bucket += 1;
+            }
+            counts[bucket - 1] += 1;
+        }
+
+        return counts;
     }
 
     private double getTimestamp() {

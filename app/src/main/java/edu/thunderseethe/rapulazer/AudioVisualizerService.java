@@ -26,6 +26,11 @@ public class AudioVisualizerService extends IntentService {
     public class AudioFeatureBinder extends Binder
     {
 
+        public AudioFeatureBinder() {
+            super();
+            AudioVisualizerService.this.onCreate();
+        }
+
         public DataRef<AudioFeatures> dataRef() {
             return AudioVisualizerService.this.mAudioFeatureRef;
         }
@@ -37,13 +42,20 @@ public class AudioVisualizerService extends IntentService {
         public void onPause() {
             AudioVisualizerService.this.mVis.setEnabled(false);
         }
+
+        public void setBuckets(int buckets) {
+            AudioVisualizerService.this.mFeatureExtractor.setBuckets(buckets);
+        }
+        public int getMaxBucketSize() {
+            return AudioVisualizerService.this.mCaptureSize;
+        }
     }
 
     private Visualizer mVis;
     private AudioFeatureExtractor mFeatureExtractor;
-    private LocalBroadcastManager mBManager;
     private DataRef<AudioFeatures> mAudioFeatureRef = DataRef.empty();
     private final Binder mBinder = new AudioFeatureBinder();
+    private int mCaptureSize = 0;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -63,6 +75,7 @@ public class AudioVisualizerService extends IntentService {
         Log.d("AudioVisualizerService", "Initialization starting");
         mVis = new Visualizer(0);
         mVis.setEnabled(false);
+        mVis.setMeasurementMode(Visualizer.MEASUREMENT_MODE_PEAK_RMS);
 
         final int SAMPLING_RATE = Visualizer.getMaxCaptureRate();
 
@@ -75,36 +88,38 @@ public class AudioVisualizerService extends IntentService {
 
         final Visualizer.MeasurementPeakRms measurement = new Visualizer.MeasurementPeakRms();
 
-        mVis.setCaptureSize(range[0]);
+        mCaptureSize = range[0];
+        mVis.setCaptureSize(mCaptureSize);
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
             @Override
             public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(waveform));
-                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
+                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(waveform));
+                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
-                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
+                AudioFeatures last = mAudioFeatureRef.data();
+                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+
+                Log.d("CATHACKS", String.format("%s PEAK:%s\tRMS:%s", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
             }
-        }, SAMPLING_RATE, true, true);
+        }, SAMPLING_RATE, false, true);
 
         //These are all magic values, don't worry about it
         int sampleSizeInBits = 8;
         int channels = 1;
         TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
-                TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
-                SAMPLING_RATE,
-                sampleSizeInBits,
-                channels,
-                (sampleSizeInBits + 7) / 8 * channels,
-                16, //This value doesn't matter as we only use format for the FloatConverter
-                true
+            TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
+            SAMPLING_RATE,
+            sampleSizeInBits,
+            channels,
+            (sampleSizeInBits + 7) / 8 * channels,
+            16, //This value doesn't matter as we only use format for the FloatConverter
+            true
         );
 
         mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format);
-        mBManager = LocalBroadcastManager.getInstance(this);
         mVis.setEnabled(true);
         Log.d("AudioVisualizerService", "Finished starting");
     }
@@ -120,7 +135,6 @@ public class AudioVisualizerService extends IntentService {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        this.onCreate(); //Manually create that shit
         return mBinder;
     }
 
