@@ -91,7 +91,7 @@ public class AndroidComplexOnsetDetector {
         this(fftSize,peakThreshold,minimumInterOnsetInterval,-70.0);
     }
 
-    public boolean isBeat(float[] buffer, float sample_rate, int overlap) {
+    public boolean isBeat(float[] buffer) {
         //calculate the complex fft (the magnitude and phase)
         float[] data = buffer.clone();
         float[] power = new float[data.length/2];
@@ -120,11 +120,7 @@ public class AndroidComplexOnsetDetector {
 
         lastOnsetValue = onsetValue;
 
-
         boolean isOnset = peakPicker.pickPeak(onsetValue);
-        if(isOnset)
-            return true;
-        else
-            return false;
+        return isOnset;
     }
 }

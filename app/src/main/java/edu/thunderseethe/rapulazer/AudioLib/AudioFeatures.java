@@ -12,6 +12,7 @@ public class AudioFeatures {
     public boolean is_silence;
     public boolean is_beat;
     public boolean is_percussion;
+    public boolean is_rap;
 
     /**
      * SPL is actually a ratio of the absolute, Sound Pressure and a reference level (usually the Threshold of Hearing,

@@ -6,9 +6,12 @@ import android.media.audiofx.Visualizer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatureExtractor;
@@ -19,6 +22,13 @@ import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
  */
 
 public class AudioVisualizerService extends IntentService {
+
+    static {
+        System.loadLibrary("tensorflow_inference");
+    }
+
+    private static final String MODEL_FILE = "file:///android_asset/frozen_model.pb";
+
     public class AudioFeatureBinder extends Binder
     {
 
@@ -95,7 +105,7 @@ public class AudioVisualizerService extends IntentService {
                 AudioFeatures last = mAudioFeatureRef.data();
                 mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
 
-                Log.d("CATHACKS", MainActivity.prettyPrintDoubleArray(mAudioFeatureRef.data().freq_counts));
+//                Log.d("CATHACKS", MainActivity.prettyPrintDoubleArray(mAudioFeatureRef.data().freq_counts));
                 Log.d("CATHACKS", String.format("%s PEAK:%s\tRMS:%s", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
             }
         }, SAMPLING_RATE, false, true);
@@ -104,16 +114,16 @@ public class AudioVisualizerService extends IntentService {
         int sampleSizeInBits = 8;
         int channels = 1;
         TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
-            TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
-            SAMPLING_RATE,
-            sampleSizeInBits,
-            channels,
-            (sampleSizeInBits + 7) / 8 * channels,
-            16, //This value doesn't matter as we only use format for the FloatConverter
-            true
+                TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
+                SAMPLING_RATE,
+                sampleSizeInBits,
+                channels,
+                (sampleSizeInBits + 7) / 8 * channels,
+                16, //This value doesn't matter as we only use format for the FloatConverter
+                true
         );
 
-        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format);
+        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format, null);
         mVis.setEnabled(true);
         Log.d("AudioVisualizerService", "Finished starting");
     }
