@@ -42,18 +42,19 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
         private IntBuffer mVbo, mVao;
         private FloatBuffer mVboBuffer;
+        private FloatBuffer mVboInstanceBuffer;
         private ByteBuffer  mIboBuffer;
-        private float x=-1, y=-1, z=-1, width=2, height=2, depth=2;
+        private float x=-0.5f, y=-0.5f, z=-0.5f, width=1, height=1, depth=1;
 
         private float vbo_arr[] = {
-                x, y, z, 1, 0, 0,
-                x+width, y, z, 0, 1, 0,
-                x+width, y+height, z, 0, 0, 1,
-                x, y+height, z, 0, 0.5f, 0.5f,
-                x, y, z+depth, 0, 0, 1,
-                x+width, y, z+depth, 0.5f, 0, 0.5f,
-                x+width, y+height, z+depth, 1, 0, 0,
-                x, y+height, z+depth, 1, 0, 0,
+                x, y, z,// 1, 0, 0,
+                x+width, y, z,// 0, 1, 0,
+                x+width, y+height, z,// 0, 0, 1,
+                x, y+height, z,// 0, 0.5f, 0.5f,
+                x, y, z+depth,// 0, 0, 1,
+                x+width, y, z+depth,// 0.5f, 0, 0.5f,
+                x+width, y+height, z+depth,// 1, 0, 0,
+                x, y+height, z+depth,// 1, 0, 0,
         };
 
         private byte ibo_arr[] = {
@@ -78,6 +79,11 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
             mVboBuffer.put(vbo_arr);
             mVboBuffer.position(0);
 
+            byteBuf = ByteBuffer.allocateDirect(100000 * FLOAT_BYTES);
+            byteBuf.order(ByteOrder.nativeOrder());
+            mVboInstanceBuffer = byteBuf.asFloatBuffer();
+            mVboInstanceBuffer.position(0);
+
             mIboBuffer = ByteBuffer.allocateDirect(ibo_arr.length);
             mIboBuffer.put(ibo_arr);
             mIboBuffer.position(0);
@@ -88,15 +94,16 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
             GLES30.glGenVertexArrays(1, mVao);
             mVao.position(0);
 
-            byteBuf = ByteBuffer.allocateDirect(8);
+            byteBuf = ByteBuffer.allocateDirect(12);
             byteBuf.order(ByteOrder.nativeOrder());
             mVbo = byteBuf.asIntBuffer();
-            GLES30.glGenBuffers(2, mVbo);
+            GLES30.glGenBuffers(3, mVbo);
             mVbo.position(0);
 
             // Bind the Vertex Array Object
             GLES30.glBindVertexArray(mVao.get(0));
 
+            /* ------------------------------------ */
             // Bind the Vertex Buffer Object
             GLES30.glBindBuffer( GLES30.GL_ELEMENT_ARRAY_BUFFER, mVbo.get(1) );
 
@@ -104,6 +111,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
             GLES30.glBufferData( GLES30.GL_ELEMENT_ARRAY_BUFFER, mIboBuffer.capacity(), mIboBuffer, GLES30.GL_STATIC_DRAW );
             GLES30.glBindBuffer( GLES30.GL_ELEMENT_ARRAY_BUFFER, 0 );
 
+            /* ------------------------------------ */
             // Bind the vertices
             GLES30.glBindBuffer( GLES30.GL_ARRAY_BUFFER, mVbo.get(0) );
 
@@ -112,39 +120,97 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
             // Set attributes
             GLES30.glEnableVertexAttribArray( 0 );
-            GLES30.glVertexAttribPointer( 0, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 0 );
+            GLES30.glVertexAttribPointer( 0, 3, GLES20.GL_FLOAT, false, 0, 0 );
+
+            /* ------------------------------------ */
+            // Bind the offsets
+            GLES30.glBindBuffer( GLES30.GL_ARRAY_BUFFER, mVbo.get(2) );
+
+            // Bind the data to the VBO
+            GLES30.glBufferData( GLES30.GL_ARRAY_BUFFER, mVboInstanceBuffer.capacity()*4, mVboInstanceBuffer, GLES30.GL_DYNAMIC_DRAW );
+
+            // Set attributes
             GLES30.glEnableVertexAttribArray( 1 );
             GLES30.glVertexAttribPointer( 1, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 3*FLOAT_BYTES );
+            GLES30.glVertexAttribDivisor( 1, 1 );
+            GLES30.glEnableVertexAttribArray( 2 );
+            GLES30.glVertexAttribPointer( 2, 3, GLES20.GL_FLOAT, false, 6*FLOAT_BYTES, 0 );
+            GLES30.glVertexAttribDivisor( 2, 1 );
 
+            /* ------------------------------------ */
             // Clear buffers
             GLES30.glBindBuffer( GLES30.GL_ARRAY_BUFFER, 0 );
             GLES30.glBindVertexArray( 0 );
         }
 
-        public void draw(GL10 gl) {
+        public void draw(GL10 gl, float[] vbo_offset_arr) {
+            /* Update the offset data */
+            mVboInstanceBuffer.put(vbo_offset_arr);
+            mVboInstanceBuffer.position(0);
+
+            // Bind the offsets
+            GLES30.glBindBuffer( GLES30.GL_ARRAY_BUFFER, mVbo.get(2) );
+
+            // Bind the data to the VBO
+            GLES30.glBufferData( GLES30.GL_ARRAY_BUFFER, vbo_offset_arr.length*4, mVboInstanceBuffer, GLES30.GL_DYNAMIC_DRAW );
+
+            /* ------------------------------------ */
+            /* Draw what we just bound the GPU */
             mIboBuffer.position(0);
             mVboBuffer.position(0);
-
-            /* Draw what we just bound the GPU */
 
             // Bind to the VAO that has all the information about the vertices
             GLES30.glBindVertexArray( mVao.get(0) );
             GLES30.glEnableVertexAttribArray( 0 );
             GLES30.glEnableVertexAttribArray( 1 );
+            GLES30.glEnableVertexAttribArray( 2 );
 
             // Bind to the index VBO that has all the information about the order of the vertices
             GLES30.glBindBuffer( GLES30.GL_ELEMENT_ARRAY_BUFFER, mVbo.get(1) );
 
             // Draw everything
-            GLES30.glDrawElements( GLES11.GL_TRIANGLES, ibo_arr.length, GLES20.GL_UNSIGNED_BYTE, 0 );
+            GLES30.glDrawElementsInstanced( GLES11.GL_TRIANGLES, ibo_arr.length, GLES20.GL_UNSIGNED_BYTE, 0, vbo_offset_arr.length/6 );
 
             // Put everything back to default (deselect)
             GLES30.glBindBuffer( GLES30.GL_ELEMENT_ARRAY_BUFFER, 0 );
             GLES30.glDisableVertexAttribArray( 0 );
             GLES30.glDisableVertexAttribArray( 1 );
+            GLES30.glDisableVertexAttribArray( 2 );
             GLES30.glBindVertexArray( 0 );
         }
     }
+
+    private static final float[][] rainbow_colors = {
+            {148f/255f,     0,          211f/255f},
+            {75f/255f,      0,          130f/255f},
+            {0,             0,          255f/255f},
+            {0,             255f/255f,  0},
+            {255f/255f,     255f/255f,  0},
+            {255f/255f,     127f/255f,  0},
+            {255f/255f,     0,          0}
+    };
+
+    private static float[] getRainbow(float degree) {
+        if( degree > 1 ) {
+            degree = 1;
+        }else if( degree < 0 ){
+            degree = 0;
+        }
+        // Get two closest colors
+        int first = (int) Math.floor(degree * (rainbow_colors.length-1));
+        int second = (int) Math.ceil(degree * (rainbow_colors.length-1));
+
+        // Blend both colors
+        float[] result = { 0, 0, 0, 0 };
+        for( int i=0 ; i<3 ; i++ ) {
+            result[i] = (float) Math.sqrt(Math.pow(rainbow_colors[first][i], 2) + Math.pow(rainbow_colors[second][i], 2));
+        }
+
+        // Set alpha channel
+        result[3] = 1;
+
+        return result;
+    };
 
     private final float[] mVMatrix = new float[16];
     private final float[] mPMatrix = new float[16];
@@ -285,6 +351,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glUseProgram( mProgram );
         GLES30.glBindAttribLocation( mProgram, 0, "in_position" );
         GLES30.glBindAttribLocation( mProgram, 1, "in_color" );
+        GLES30.glBindAttribLocation( mProgram, 2, "in_offset" );
 
         mCube = new Cube();
 
@@ -359,8 +426,9 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         Matrix.setIdentityM(mMMatrix, 0);
         Matrix.translateM(mMMatrix, 0, shake_dx, shake_dy, 0);
 //        Matrix.rotateM(mMMatrix, 0, rotation, 0, 1, 0);
+        GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
 
-        float sections = 4;
+        float sections = MainActivity.BUCKETS;
         float scene_width = 10;
         float scene_height = 10;
         float left = -scene_width/2;
@@ -369,24 +437,54 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         float bottom = scene_height/2;
         float step_x = scene_width/sections;
         float step_y = scene_height/sections;
+        float tile_size = scene_width / sections;
 
         // Draw objects
         float flash = (float) (Math.min(running_bpm_count, 2.0f*Math.PI) / 50.0f*Math.PI);
         gl.glClearColor(flash, flash, flash, 1);
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
-        for( float tx=left ; tx<=right ; tx+=step_x ) {
-            Matrix.translateM(mMMatrix, 0, tx, 0, 0);
-            for( float ty=top ; ty<=bottom ; ty+=step_y ) {
-                Matrix.translateM(mMMatrix, 0, 0, ty, 0);
-                Matrix.scaleM(mMMatrix, 0, scale, scale, scale);
-                GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
-                Matrix.scaleM(mMMatrix, 0, 1/scale, 1/scale, 1/scale);
-                Matrix.translateM(mMMatrix, 0, 0, -ty, 0);
-                mCube.draw(gl);
+
+
+        // Create instance array
+        float[] instance_vbo = new float[(int) (6*(sections+1)*(sections+1))];
+        float[] set_color = new float[4];
+        float[] frequency_amplitudes = new float[(int) sections+1];
+        int max_count = 100;
+        // Get frequency graph
+        if( mDataRef.data() != null ) {
+            int[] freq_count = mDataRef.data().freq_counts;
+
+            for( int i=0 ; i<freq_count.length ; i++ ) {
+                frequency_amplitudes[i] = (MAX_COUNT == 0) ? 1 : freq_count[i] / (float)MAX_COUNT;
+                if( frequency_amplitudes[i] > 1 ) {
+                    frequency_amplitudes[i] = 1;
+                }
             }
-            Matrix.translateM(mMMatrix, 0, -tx, 0, 0);
         }
+        float darkness_constant = 0.3f;
+        int i=0, j=0;
+        for( float ty=top, py=0 ; ty<=bottom ; ty+=step_y ) {
+            set_color = getRainbow( py );
+            py += 1/sections;
+            for( float tx=left, px=0 ; tx<=right ; tx+=step_x ) {
+                px += 1/sections;
+                instance_vbo[i++] = tx;
+                instance_vbo[i++] = ty;
+                instance_vbo[i++] = tile_size * scale;
+                instance_vbo[i++] = set_color[0];
+                instance_vbo[i++] = set_color[1];
+                instance_vbo[i++] = set_color[2];
+
+                if( px > frequency_amplitudes[j] ){
+                    instance_vbo[i-1] -= Math.max(instance_vbo[i-1]-darkness_constant, 0);
+                    instance_vbo[i-2] -= Math.max(instance_vbo[i-2]-darkness_constant, 0);
+                    instance_vbo[i-3] -= Math.max(instance_vbo[i-3]-darkness_constant, 0);
+                }
+            }
+            j++;
+        }
+        mCube.draw(gl, instance_vbo);
 
         // Check for errors
         int err = gl.glGetError();

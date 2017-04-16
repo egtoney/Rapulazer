@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
     private boolean mBound = false;
     private VisualizerGLRenderer mRenderer;
     private AudioVisualizerService.AudioFeatureBinder mService;
-    private final int BUCKETS = 20000;
+    public static final int BUCKETS = 32;
 
     protected static String prettyPrintByteArray(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
             //fuck glview
             mRenderer.updateRef(mService.dataRef());
             mRenderer.setMaxCount(mService.getMaxBucketSize());
-            mService.setBuckets(BUCKETS);
+            mService.setBuckets(BUCKETS+1);
 
             mBound = true;
         }
