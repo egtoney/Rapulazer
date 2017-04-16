@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     //private LocalBroadcastManager mBManager;
     //private DataRef<AudioFeatures> mAudioFeaturesRef;
     private boolean mBound = false;
-    private VisualizerGLRenderer mRenderer = new VisualizerGLRenderer(DataRef.<AudioFeatures>empty());
+    private VisualizerGLRenderer mRenderer = new VisualizerGLRenderer(this, DataRef.<AudioFeatures>empty());
 
     protected static String prettyPrintByteArray(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
