@@ -54,23 +54,25 @@ def load_csv(fname, num_epochs=None):
   return feat, label, recname
 
 def load_train():
-  data = load_csv('./dataset/train.csv')
+	with tf.device('/cpu:0'):
+		data = load_csv('./dataset/train.csv')
 
-  tensors = tf.train.shuffle_batch(data,
-                                   num_threads=16,
-                                   capacity=1000,
-                                   min_after_dequeue=500,
-                                   batch_size=32)
+		tensors = tf.train.shuffle_batch(data,
+																		 num_threads=32,
+																		 capacity=1000,
+																		 min_after_dequeue=200,
+																		 batch_size=32)
 
-  return tensors
+		return tensors
 
 def load_test():
-  data = load_csv('./dataset/test.csv', num_epochs=1)
+	with tf.device('/cpu:0'):
+		data = load_csv('./dataset/test.csv', num_epochs=1)
 
-  tensors = tf.train.batch(data,
-                           batch_size=32,
-                           num_threads=16,
-                           capacity=1000,
-                           allow_smaller_final_batch=True)
+		tensors = tf.train.batch(data,
+														 batch_size=32,
+														 num_threads=16,
+														 capacity=1000,
+														 allow_smaller_final_batch=True)
 
-  return tensors
+		return tensors

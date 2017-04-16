@@ -130,7 +130,7 @@ with tf.Session(config=config) as sess:
       summary_writer.add_summary(_summary, _i)
       summary_writer.flush()
 
-      if _i % 100 == 0:
+      if _i % 1000 == 0:
         print("saving total checkpoint")
         saver.save(sess, checkpoint_dir + 'model.ckpt', global_step=_i)
 

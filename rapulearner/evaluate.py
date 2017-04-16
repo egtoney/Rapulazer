@@ -7,25 +7,22 @@ from __future__ import division, print_function, absolute_import
 
 import os
 import sys
-import tensorflow as tf
-import numpy as np
-import dataset
-import network
-import itertools
 import util
+import itertools
+import network
+import dataset
+import definition
+import numpy as np
+import tensorflow as tf
 
 slim = tf.contrib.slim
 
-#
-# parse inputs 
-#
+args = util.parse_arguments()
+run_name = util.run_name(args)
 
-nc,dc,rc = util.parse_arguments()
-run_name = util.run_name(nc,dc,rc)
-
-checkpoint_dir = 'checkpoint/' + run_name + '/'
+checkpoint_dir = definition.ckpt_base + run_name + '/'
 out_file = checkpoint_dir + 'output.csv'
-summary_dir = 'logs/' + run_name
+summary_dir = definition.log_base + run_name + '/'
 
 if os.path.isfile(out_file):
     print('Skipping ({:s}): output file ({:s}) already exists'.format(run_name, out_file))
@@ -41,12 +38,16 @@ out_file_auc = checkpoint_dir + 'AUC.csv'
 with tf.variable_scope('Input'):
     print('Defining input pipeline')
 
-    feat, label, recname = dataset.records_test_fold(**dc)
+    feat, label, recname = dataset.load_train()
 
 with tf.variable_scope('Predictor'):
     print('Defining prediction network')
 
-    logits = network.network(feat,is_training=False,**nc)
+    logits = network.network(feat, 
+                             is_training=True, 
+                             capacity=args.capacity,
+                             capacity2=args.capacity2,
+                             network='v5')
 
     probs = tf.nn.softmax(logits)
     prediction = tf.cast(tf.argmax(logits,1),dtype=tf.int32)
@@ -86,6 +87,9 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     if ckpt and ckpt.model_checkpoint_path: 
         print('Restoring checkpoint')
         saver.restore(sess, ckpt.model_checkpoint_path)
+    else:
+				print('Checkpoint not found, exiting')
+				exit(0)
 
     print('Starting evaluation')
     _conf_accum = np.zeros((2,2), dtype=np.int64)
