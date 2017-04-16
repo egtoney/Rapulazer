@@ -4,6 +4,7 @@ import android.media.audiofx.Visualizer;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import be.tarsos.dsp.SilenceDetector;
 import be.tarsos.dsp.beatroot.BeatRootOnsetEventHandler;
@@ -96,6 +97,7 @@ public class AudioFeatureExtractor {
 
         audio_features.freq_counts = frequency_counts(buffer, buckets);
 
+
         return audio_features;
     }
 
@@ -103,13 +105,14 @@ public class AudioFeatureExtractor {
         this.buckets = buckets;
     }
 
-    private int[] frequency_counts(byte[] buffer, int n) {
+    private double[] frequency_counts(byte[] buffer, int n) {
         int[] counts = new int[n];
         Arrays.sort(buffer);
         int range = buffer[buffer.length - 1] - buffer[0];
         if(range == 0) {
-            counts[0] = buffer.length;
-            return counts;
+            double[] out = new double[n];
+            out[0] = 1;
+            return out;
         }
 
 
@@ -126,8 +129,19 @@ public class AudioFeatureExtractor {
             }
             counts[bucket - 1] += 1;
         }
+        int max_count = counts[0];
+        for(int i : counts) {
+           if(i > max_count)
+               max_count = i;
+        }
 
-        return counts;
+        double log_max_count = Math.log10(max_count);
+        double[] percents = new double[n];
+        for(int i = 0; i < counts.length; i += 1){
+            percents[i] = Math.log10(counts[i]) / log_max_count;
+        }
+
+        return percents;
     }
 
     private double getTimestamp() {

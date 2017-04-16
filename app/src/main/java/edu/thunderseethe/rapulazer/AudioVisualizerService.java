@@ -73,7 +73,7 @@ public class AudioVisualizerService extends IntentService {
         mVis.setEnabled(false);
         mVis.setMeasurementMode(Visualizer.MEASUREMENT_MODE_PEAK_RMS);
 
-        final int SAMPLING_RATE = Visualizer.getMaxCaptureRate();
+        final int SAMPLING_RATE = (int)Math.round(Visualizer.getMaxCaptureRate() / 1.5);
 
         final Bundle bundle = new Bundle();
         bundle.putByteArray("fft", new byte[]{});
@@ -84,7 +84,7 @@ public class AudioVisualizerService extends IntentService {
 
         final Visualizer.MeasurementPeakRms measurement = new Visualizer.MeasurementPeakRms();
 
-        mCaptureSize = range[0];
+        mCaptureSize = range[1];
         mVis.setCaptureSize(mCaptureSize);
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
             @Override
@@ -95,6 +95,7 @@ public class AudioVisualizerService extends IntentService {
                 AudioFeatures last = mAudioFeatureRef.data();
                 mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
 
+                Log.d("CATHACKS", MainActivity.prettyPrintDoubleArray(mAudioFeatureRef.data().freq_counts));
                 Log.d("CATHACKS", String.format("%s PEAK:%s\tRMS:%s", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
             }
         }, SAMPLING_RATE, false, true);

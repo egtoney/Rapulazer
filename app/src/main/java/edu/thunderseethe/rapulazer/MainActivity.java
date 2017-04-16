@@ -47,7 +47,19 @@ public class MainActivity extends Activity {
     public static String prettyPrintIntArray(int[] ints) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for(float f : ints) {
+        for(int f : ints) {
+            sb.append(" '");
+            sb.append(f);
+            sb.append("',");
+        }
+        sb.append(" ]");
+        return sb.toString();
+    }
+
+    public static String prettyPrintDoubleArray(double[] doubles) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(double f : doubles) {
             sb.append(" '");
             sb.append(f);
             sb.append("',");
