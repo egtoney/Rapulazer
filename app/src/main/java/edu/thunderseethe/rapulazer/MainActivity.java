@@ -1,29 +1,20 @@
 package edu.thunderseethe.rapulazer;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.MediaStore;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
 
 public class MainActivity extends Activity {
 
     protected GLSurfaceView mGLView;
-    //private BroadcastReceiver mReceiver;
-    //private LocalBroadcastManager mBManager;
-    //private DataRef<AudioFeatures> mAudioFeaturesRef;
     private boolean mBound = false;
     private VisualizerGLRenderer mRenderer;
     private AudioVisualizerService.AudioFeatureBinder mService;
@@ -59,31 +50,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         mRenderer = new VisualizerGLRenderer(getApplicationContext(), DataRef.<AudioFeatures>empty());
-        //final TextView fftText = (TextView)findViewById(R.id.fft_text);
-        //final TextView waveformText = (TextView)findViewById(R.id.waveform_text);
-
-
-        /*mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Bundle bundle = intent.getExtras();
-                mDataRef.update(bundle);
-
-                String fftString = prettyPrintByteArray(bundle.getByteArray("fft"));
-                String waveformString = prettyPrintByteArray(bundle.getByteArray("waveform"));
-
-                fftText.setText(prettyPrintByteArray(bundle.getByteArray("fft")));
-                waveformText.setText(prettyPrintByteArray(bundle.getByteArray("waveform")));
-
-                Log.i("CATHACKS", fftString);
-                Log.i("CATHACKS", waveformString);
-            }
-        };*/
-
-        /*mBManager = LocalBroadcastManager.getInstance(this);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(getString(R.string.visualize_data));
-        mBManager.registerReceiver(mReceiver, intentFilter);*/
 
         mGLView = new GLSurfaceView(this);
         setContentView(mGLView);
@@ -99,9 +65,9 @@ public class MainActivity extends Activity {
         super.onStart();
         if(!mBound) {
             bindService(
-                    new Intent(this, AudioVisualizerService.class),
-                    mConnection,
-                    Context.BIND_AUTO_CREATE
+                new Intent(this, AudioVisualizerService.class),
+                mConnection,
+                Context.BIND_AUTO_CREATE
             );
         }
 

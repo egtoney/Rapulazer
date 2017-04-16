@@ -8,11 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import java.io.FileDescriptor;
-import java.util.Arrays;
 
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatureExtractor;
@@ -92,10 +88,7 @@ public class AudioVisualizerService extends IntentService {
         mVis.setCaptureSize(mCaptureSize);
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
             @Override
-            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(waveform));
-                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
-            }
+            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {}
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
@@ -139,7 +132,5 @@ public class AudioVisualizerService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-
-    }
+    protected void onHandleIntent(@Nullable Intent intent) {}
 }
