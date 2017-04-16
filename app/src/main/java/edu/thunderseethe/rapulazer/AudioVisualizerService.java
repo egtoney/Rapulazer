@@ -6,12 +6,8 @@ import android.media.audiofx.Visualizer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatureExtractor;
@@ -23,11 +19,6 @@ import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
 
 public class AudioVisualizerService extends IntentService {
 
-    static {
-        System.loadLibrary("tensorflow_inference");
-    }
-
-    private static final String MODEL_FILE = "file:///android_asset/frozen_model.pb";
 
     public class AudioFeatureBinder extends Binder
     {
@@ -103,9 +94,9 @@ public class AudioVisualizerService extends IntentService {
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
                 AudioFeatures last = mAudioFeatureRef.data();
-                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+                mAudioFeatureRef
+                    .update(mFeatureExtractor.getFeatures(fft, last == null ? 0 : last.max_count));
 
-//                Log.d("CATHACKS", MainActivity.prettyPrintDoubleArray(mAudioFeatureRef.data().freq_counts));
                 Log.d("CATHACKS", String.format("%s PEAK:%s\tRMS:%s", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
             }
         }, SAMPLING_RATE, false, true);
@@ -123,7 +114,7 @@ public class AudioVisualizerService extends IntentService {
                 true
         );
 
-        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format, null);
+        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format);
         mVis.setEnabled(true);
         Log.d("AudioVisualizerService", "Finished starting");
     }

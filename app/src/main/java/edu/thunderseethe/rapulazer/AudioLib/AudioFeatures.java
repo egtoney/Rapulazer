@@ -35,6 +35,7 @@ public class AudioFeatures {
      */
     public PitchDetectionResult pitch_detection_result;
     public double[] freq_counts;
+    public double max_count;
 
     public String toString() {
         return String.format(Locale.CANADA, "AudioFeature(%b, %b, %b, %f, %f, %f)", is_silence, is_beat, is_percussion, sound_pressure_level, average_envelope, pitch_detection_result.getPitch());

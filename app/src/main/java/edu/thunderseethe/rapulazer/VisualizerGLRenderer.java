@@ -370,7 +370,10 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
 
+        float density = mContext.getResources().getDisplayMetrics().density;
         ratio = (float) width / height;
+
+        //Log.d("CATHACKS", String.format("%d %d"))
 
         // create a projection matrix from device screen geometry
         Matrix.perspectiveM(mPMatrix, 0, 40.0f, ratio, 0.1f, 10000.0f);
@@ -432,8 +435,8 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
 
         float sections = MainActivity.BUCKETS;
-        float scene_width = 10;
-        float scene_height = 10/ratio;
+        float scene_width = 10 * ratio * 1.7f;
+        float scene_height = 10 * 1.75f;
         float left = -scene_width/2;
         float right = scene_width/2;
         float top = -scene_height/2;
