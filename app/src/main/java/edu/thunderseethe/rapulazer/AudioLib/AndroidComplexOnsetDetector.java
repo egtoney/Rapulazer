@@ -1,5 +1,6 @@
 package edu.thunderseethe.rapulazer.AudioLib;
 
+import be.tarsos.dsp.onsets.OnsetHandler;
 import be.tarsos.dsp.util.fft.FFT;
 import be.tarsos.dsp.util.PeakPicker;
 import be.tarsos.dsp.util.fft.HannWindow;
@@ -30,6 +31,8 @@ public class AndroidComplexOnsetDetector {
     private double lastOnsetValue;
 
     private final PeakPicker peakPicker;
+
+    private OnsetHandler handler;
 
     /**
      * To calculate the FFT.
@@ -88,16 +91,16 @@ public class AndroidComplexOnsetDetector {
         this(fftSize,peakThreshold,minimumInterOnsetInterval,-70.0);
     }
 
-    public boolean isBeat(float[] buffer, float sample_rate, int overlap, double time_stamp) {
+    public boolean isBeat(float[] buffer, float sample_rate, int overlap) {
         //calculate the complex fft (the magnitude and phase)
         float[] data = buffer.clone();
-        float[] power = new float[data.length / 2];
-        float[] phase = new float[data.length / 2];
+        float[] power = new float[data.length/2];
+        float[] phase = new float[data.length/2];
         fft.powerPhaseFFT(data, power, phase);
 
         float onsetValue = 0;
 
-        for (int j = 0; j < power.length; j++) {
+        for(int j = 0 ; j < power.length ; j++){
             //int imgIndex = (power.length - 1) * 2 - j;
 
             // compute the predicted phase
@@ -105,29 +108,23 @@ public class AndroidComplexOnsetDetector {
 
             // compute the euclidean distance in the complex domain
             // sqrt ( r_1^2 + r_2^2 - 2 * r_1 * r_2 * \cos ( \phi_1 - \phi_2 ) )
-            onsetValue += Math.sqrt(Math.abs(Math.pow(oldmag[j], 2) + Math.pow(power[j], 2) - 2. * oldmag[j] * power[j] * Math.cos(dev1[j] - phase[j])));
+            onsetValue += Math.sqrt(Math.abs(Math.pow(oldmag[j],2) + Math.pow(power[j],2) - 2. * oldmag[j] *power[j] * Math.cos(dev1[j] - phase[j])));
 
 			/* swap old phase data (need to remember 2 frames behind)*/
             theta2[j] = theta1[j];
             theta1[j] = phase[j];
 
 			/* swap old magnitude data (1 frame is enough) */
-            oldmag[j] = power[j];
+            oldmag[j]= power[j];
         }
 
         lastOnsetValue = onsetValue;
 
 
         boolean isOnset = peakPicker.pickPeak(onsetValue);
-        if (isOnset) {
-            double delay = ((overlap * 4.3)) / sample_rate;
-            double onsetTime = time_stamp - delay;
-            if (onsetTime - lastOnset > minimumInterOnsetInterval) {
-                lastOnset = onsetTime;
-                return true;
-            }
-        }
-
-        return false;
+        if(isOnset)
+            return true;
+        else
+            return false;
     }
 }

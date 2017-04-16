@@ -38,6 +38,18 @@ public class MainActivity extends Activity {
         return sb.toString();
     }
 
+    public static String prettyPrintFloatArray(float[] floats) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(float f : floats) {
+            sb.append(" '");
+            sb.append(f);
+            sb.append("',");
+        }
+        sb.append(" ]");
+        return sb.toString();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -75,21 +75,21 @@ public class AudioVisualizerService extends IntentService {
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
             @Override
             public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(waveform));
-                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
+//                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(waveform));
+//                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
-                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
+                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
-        }, SAMPLING_RATE, true, false);
+        }, SAMPLING_RATE, true, true);
 
         //These are all magic values, don't worry about it
         int sampleSizeInBits = 8;
         TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
-                TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
+                TarsosDSPAudioFormat.Encoding.PCM_SIGNED,
                 SAMPLING_RATE,
                 sampleSizeInBits,
                 1,
