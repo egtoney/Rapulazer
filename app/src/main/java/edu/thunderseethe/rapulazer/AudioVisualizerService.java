@@ -106,7 +106,7 @@ public class AudioVisualizerService extends IntentService {
                 mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
 
 //                Log.d("CATHACKS", MainActivity.prettyPrintDoubleArray(mAudioFeatureRef.data().freq_counts));
-//                Log.d("CATHACKS", String.format("%s PEAK:%s\tRMS:%s", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
+                Log.d("CATHACKS", String.format("%s PEAK:%s\tRMS:%s", mAudioFeatureRef.data().toString(), measurement.mPeak, measurement.mRms));
             }
         }, SAMPLING_RATE, false, true);
 

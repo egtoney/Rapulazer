@@ -104,7 +104,7 @@ public class AudioFeatureExtractor {
         /*
          * Check complex onset detector
          */
-        audio_features.is_beat = !audio_features.is_silence && this.complex_onset_detector.isBeat(f_buffer, sample_rate, this.buffer_size);
+        audio_features.is_beat = !audio_features.is_silence && this.complex_onset_detector.isBeat(f_buffer);
 
         audio_features.is_percussion = this.percussion_onset_detector.process(f_buffer);
 
@@ -179,19 +179,16 @@ public class AudioFeatureExtractor {
             return out;
         }
 
-
-        /* dicks dicks dicks dicks
-         dicks dicks dicks dicks
-         dicks dicks dicks dicks
-        dicks dicks dicks dicks */
-
         double bucket_size = (double)range / (n - 1);
         int bucket = 1;
         for(int i = 0; i < buffer.length; i += 1) {
             if((buffer[i] - buffer[0]) > bucket * bucket_size) {
                 bucket += 1;
             }
-            counts[bucket - 1] += 1;
+            if(buckets - 1 == counts.length)
+                counts[bucket - 2] += 1;
+            else
+                counts[bucket - 1] += 1;
         }
         int max_count = counts[0];
         for(int i : counts) {
