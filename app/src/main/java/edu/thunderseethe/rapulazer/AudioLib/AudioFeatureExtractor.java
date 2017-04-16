@@ -111,7 +111,9 @@ public class AudioFeatureExtractor {
         int range = buffer[buffer.length - 1] - buffer[0];
         if(range == 0) {
             double[] out = new double[n];
-            out[0] = 1;
+            for(int i = 0; i < out.length; i += 1) {
+                out[i] = 1/n;
+            }
             return out;
         }
 
@@ -138,7 +140,10 @@ public class AudioFeatureExtractor {
         double log_max_count = Math.log10(max_count);
         double[] percents = new double[n];
         for(int i = 0; i < counts.length; i += 1){
-            percents[i] = Math.log10(counts[i]) / log_max_count;
+            percents[i] =
+                counts[i] != 0
+                    ? Math.log10(counts[i]) / log_max_count
+                    : 0;
         }
 
         return percents;

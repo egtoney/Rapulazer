@@ -78,6 +78,7 @@ public class RapulazerWallpaperService extends WallpaperService {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 mBinder = (AudioVisualizerService.AudioFeatureBinder) service;
                 mRenderer.updateRef(mBinder.dataRef());
+                mBinder.setBuckets(MainActivity.BUCKETS + 1);
                 mBound = true;
             }
 

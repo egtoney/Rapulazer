@@ -139,7 +139,6 @@ public class MainActivity extends Activity {
             mService = (AudioVisualizerService.AudioFeatureBinder) service;
             //fuck glview
             mRenderer.updateRef(mService.dataRef());
-            mRenderer.setMaxCount(mService.getMaxBucketSize());
             mService.setBuckets(BUCKETS+1);
 
             mBound = true;
