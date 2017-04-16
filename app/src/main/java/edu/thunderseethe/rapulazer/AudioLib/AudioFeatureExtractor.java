@@ -29,7 +29,7 @@ public class AudioFeatureExtractor {
         pitch_detector = new FastYin(sample_rate, buffer_size);
     }
 
-    public AudioFeatures GetFeatures(byte[] buffer) {
+    public AudioFeatures getFeatures(byte[] buffer) {
         AudioFeatures audio_features = new AudioFeatures();
 
         /**
