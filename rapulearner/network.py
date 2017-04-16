@@ -505,7 +505,8 @@ def network_v6(net, is_training=True, activation_fn=tf.nn.relu,
         return net 
 
 def network_v5(net, is_training=True, activation_fn=tf.nn.relu,
-        capacity=1.0, capacity2=1.0):
+        capacity=0.8, capacity2=0.5):
+    print('Network Capacity %f and %f' % (capacity, capacity2))
 
     net = tf.reshape(net,(-1,100000,4,1))
 
