@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
@@ -25,6 +26,7 @@ public class MainActivity extends Activity {
     //private DataRef<AudioFeatures> mAudioFeaturesRef;
     private boolean mBound = false;
     private VisualizerGLRenderer mRenderer = new VisualizerGLRenderer(DataRef.<AudioFeatures>empty());
+    private AudioVisualizerService.AudioFeatureBinder mService;
 
     protected static String prettyPrintByteArray(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -43,8 +45,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final TextView fftText = (TextView)findViewById(R.id.fft_text);
-        final TextView waveformText = (TextView)findViewById(R.id.waveform_text);
+        //final TextView fftText = (TextView)findViewById(R.id.fft_text);
+        //final TextView waveformText = (TextView)findViewById(R.id.waveform_text);
 
 
         /*mReceiver = new BroadcastReceiver() {
@@ -69,16 +71,33 @@ public class MainActivity extends Activity {
         intentFilter.addAction(getString(R.string.visualize_data));
         mBManager.registerReceiver(mReceiver, intentFilter);*/
 
-        mGLView = (GLSurfaceView)findViewById(R.id.visualizer_view);
+        mGLView = new GLSurfaceView(this);
+        setContentView(mGLView);
         mGLView.setEGLContextClientVersion(3);
         mGLView.setPreserveEGLContextOnPause(true);
         mGLView.setRenderer(mRenderer);
 
-        //startService(new Intent(this, AudioVisualizerService.class));
-        bindService(
-            new Intent(this, AudioVisualizerService.class),
-            mConnection,
-            Context.BIND_AUTO_CREATE
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(!mBound) {
+            bindService(
+                    new Intent(this, AudioVisualizerService.class),
+                    mConnection,
+                    Context.BIND_AUTO_CREATE
+            );
+        }
+
+        //Whenever we come back start up again
+        mGLView.setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
     }
 
@@ -86,6 +105,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if(mBound) {
+            mService.onResume();
             mGLView.onResume();
         }
     }
@@ -94,6 +114,7 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if(mBound) {
+            mService.onPause();
             mGLView.onPause();
         }
     }
@@ -111,9 +132,9 @@ public class MainActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            AudioVisualizerService.AudioFeatureBinder binder = (AudioVisualizerService.AudioFeatureBinder) service;
+            mService = (AudioVisualizerService.AudioFeatureBinder) service;
             //fuck glview
-            mRenderer.updateRef(binder.dataRef());
+            mRenderer.updateRef(mService.dataRef());
             mBound = true;
         }
 

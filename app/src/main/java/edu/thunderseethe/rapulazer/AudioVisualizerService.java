@@ -33,6 +33,14 @@ public class AudioVisualizerService extends IntentService {
         public DataRef<AudioFeatures> dataRef() {
             return AudioVisualizerService.this.mAudioFeatureRef;
         }
+
+        public void onResume() {
+            AudioVisualizerService.this.mVis.setEnabled(true);
+        }
+
+        public void onPause() {
+            AudioVisualizerService.this.mVis.setEnabled(false);
+        }
     }
 
     private Visualizer mVis;
@@ -56,7 +64,7 @@ public class AudioVisualizerService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("CATHACKS", "I was started");
+        Log.d("AudioVisualizerService", "Initialization starting");
         mVis = new Visualizer(0);
         mVis.setEnabled(false);
 
@@ -68,8 +76,6 @@ public class AudioVisualizerService extends IntentService {
         bundle.putInt("samplingRate", SAMPLING_RATE);
 
         int[] range = Visualizer.getCaptureSizeRange();
-        Log.d("CATHACKS", String.format("range [%d, %d]", range[0], range[1]));
-        Log.d("CATHACKS", String.format("maxCapSize %d", Visualizer.getMaxCaptureRate()));
 
         mVis.setCaptureSize(range[0]);
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
@@ -81,50 +87,34 @@ public class AudioVisualizerService extends IntentService {
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
-                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
+                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
-        }, SAMPLING_RATE, true, false);
+        }, SAMPLING_RATE, false, true);
 
         //These are all magic values, don't worry about it
         int sampleSizeInBits = 8;
+        int channels = 1;
         TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
-                TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
+                TarsosDSPAudioFormat.Encoding.PCM_SIGNED,
                 SAMPLING_RATE,
                 sampleSizeInBits,
-                1,
-                (sampleSizeInBits + 7) / 8,
-                16,
+                channels,
+                (sampleSizeInBits + 7) / 8 * channels,
+                16, //This value doesn't matter as we only use format for the FloatConverter
                 true
         );
 
         mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format);
         mBManager = LocalBroadcastManager.getInstance(this);
         mVis.setEnabled(true);
-        Log.d("CATHACKS", "I finished starting");
-    }
-
-    protected void sendUpdate(Bundle bundle) {
-        Intent visualizeData = new Intent(getString(R.string.visualize_data));
-        visualizeData.putExtras(bundle);
-        mBManager.sendBroadcast(visualizeData);
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        String action = intent.getAction();
-        if(getString(R.string.start_visualize).equals(action)) {
-            mVis.setEnabled(true);
-        }
-        if(getString(R.string.stop_visualize).equals(action)) {
-            mVis.setEnabled(false);
-        }
+        Log.d("AudioVisualizerService", "Finished starting");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("CATHACKS", "I was destroyed");
+        Log.d("AudioVisualizerService", "Destroyed");
         if(mVis != null)
             mVis.release();
     }
@@ -132,8 +122,12 @@ public class AudioVisualizerService extends IntentService {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("CATHACKS", "fuck I");
         this.onCreate(); //Manually create that shit
         return mBinder;
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+
     }
 }
