@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
 
     protected GLSurfaceView mGLView;
     private boolean mBound = false;
+    private boolean mRendererSet = false;
     private VisualizerGLRenderer mRenderer;
     private AudioVisualizerService.AudioFeatureBinder mService;
     public static final int BUCKETS = 12;
@@ -122,8 +123,8 @@ public class MainActivity extends Activity {
         super.onResume();
         if(mBound) {
             mService.onResume();
-            mGLView.onResume();
         }
+        mGLView.onResume();
     }
 
     @Override
@@ -131,8 +132,8 @@ public class MainActivity extends Activity {
         super.onPause();
         if(mBound) {
             mService.onPause();
-            mGLView.onPause();
         }
+        mGLView.onPause();
     }
 
     @Override

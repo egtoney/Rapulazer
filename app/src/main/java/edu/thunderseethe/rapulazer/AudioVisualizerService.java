@@ -134,5 +134,15 @@ public class AudioVisualizerService extends IntentService {
     }
 
     @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        return super.onUnbind(intent);
+    }
+
+    @Override
     protected void onHandleIntent(@Nullable Intent intent) {}
 }

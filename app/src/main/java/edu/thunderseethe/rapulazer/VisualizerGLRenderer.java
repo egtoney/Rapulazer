@@ -433,8 +433,8 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
 
         float sections = MainActivity.BUCKETS;
-        float scene_width = 10.5f * ratio * 1.7f;
-        float scene_height = 10.5f * 1.75f;
+        float scene_width = 10;
+        float scene_height = 10 / ratio;
         float left = -scene_width/2;
         float right = scene_width/2;
         float top = -scene_height/2;
