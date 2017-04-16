@@ -199,12 +199,12 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         // Get two closest colors
         int first = (int) Math.floor(degree * (rainbow_colors.length-1));
         int second = (int) Math.ceil(degree * (rainbow_colors.length-1));
+        float percent = (degree * (rainbow_colors.length-1)) - first;
 
         // Blend both colors
         float[] result = { 0, 0, 0, 0 };
         for( int i=0 ; i<3 ; i++ ) {
-            result[i] = (float) Math.sqrt(Math.pow(rainbow_colors[first][i], 2) + Math.pow(rainbow_colors[second][i], 2));
-//            result[i] = (float) (rainbow_colors[first][i] + rainbow_colors[second][i])/2f;
+            result[i] = (float) ((1-percent)*Math.sqrt(Math.pow(rainbow_colors[first][i], 2)) + (percent)*Math.pow(rainbow_colors[second][i], 2));
         }
 
         // Set alpha channel
@@ -373,8 +373,6 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         float density = mContext.getResources().getDisplayMetrics().density;
         ratio = (float) width / height;
 
-        //Log.d("CATHACKS", String.format("%d %d"))
-
         // create a projection matrix from device screen geometry
         Matrix.perspectiveM(mPMatrix, 0, 40.0f, ratio, 0.1f, 10000.0f);
         GLES20.glUniformMatrix4fv(muPMatrixHandle, 1, false, mPMatrix, 0);
@@ -435,8 +433,8 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
 
         float sections = MainActivity.BUCKETS;
-        float scene_width = 10 * ratio * 1.7f;
-        float scene_height = 10 * 1.75f;
+        float scene_width = 10.5f * ratio * 1.7f;
+        float scene_height = 10.5f * 1.75f;
         float left = -scene_width/2;
         float right = scene_width/2;
         float top = -scene_height/2;
@@ -488,7 +486,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         // Check for errors
         int err = gl.glGetError();
         if( err != GLES10.GL_NO_ERROR ) {
-//            Log.w("OpenGL Error", "Error Code:"+err);
+            Log.w("OpenGL Error", "Error Code:"+err);
         }
 
         gl.glFinish();
