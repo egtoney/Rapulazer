@@ -3,6 +3,7 @@ package edu.thunderseethe.rapulazer.AudioLib;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 
@@ -34,4 +35,9 @@ public class AudioFeatures {
      * the pitch itself.
      */
     public PitchDetectionResult pitch_detection_result;
+
+
+    public String toString() {
+        return String.format(Locale.CANADA, "AudioFeature(%b, %b, %f, %f, %f)", is_silence, is_beat, sound_pressure_level, average_envelope, pitch_detection_result.getPitch());
+    }
 }

@@ -37,7 +37,7 @@ public class EnvelopeDetector {
         gainRelease = (float) Math.exp(-1.0/(sampleRate*releaseTime));
     }
 
-    public float calculateAvergaeEnvelope(float[] buffer){
+    public float calculateAverageEnvelope(float[] buffer){
         float total = 0;
         for(int i = 0 ; i < buffer.length ; i++){
             float envelopeIn = Math.abs(buffer[i]);

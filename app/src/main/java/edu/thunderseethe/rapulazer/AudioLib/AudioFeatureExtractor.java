@@ -38,7 +38,6 @@ public class AudioFeatureExtractor {
         /**
          * Initialize the PitchDetector
          */
-        PitchEstimationAlgorithm algo = PitchEstimationAlgorithm.FFT_YIN;
         this.pitch_detector = new FastYin(sample_rate, buffer_size);
 
         /**
@@ -52,7 +51,7 @@ public class AudioFeatureExtractor {
         this.envelope_detector = new EnvelopeDetector(this.sample_rate);
     }
 
-    public AudioFeatures GetFeatures(byte[] buffer) {
+    public AudioFeatures getFeatures(byte[] buffer) {
         AudioFeatures audio_features = new AudioFeatures();
         float[] f_buffer = new float[buffer.length];
         float_converter.toFloatArray(buffer, f_buffer);
@@ -80,7 +79,7 @@ public class AudioFeatureExtractor {
         /**
          * Check the envelope detector
          */
-        audio_features.average_envelope = envelope_detector.calculateAvergaeEnvelope(f_buffer);
+        audio_features.average_envelope = envelope_detector.calculateAverageEnvelope(f_buffer);
 
         return audio_features;
     }

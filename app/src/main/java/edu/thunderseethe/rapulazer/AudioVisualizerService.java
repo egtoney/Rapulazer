@@ -71,36 +71,34 @@ public class AudioVisualizerService extends IntentService {
         Log.d("CATHACKS", String.format("range [%d, %d]", range[0], range[1]));
         Log.d("CATHACKS", String.format("maxCapSize %d", Visualizer.getMaxCaptureRate()));
 
-        mVis.setCaptureSize(range[1]);
+        mVis.setCaptureSize(range[0]);
         mVis.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
             @Override
             public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-                Log.d("CATHACKS", MainActivity.prettyPrintByteArray(waveform));
-                /*bundle.putByteArray("waveform", Arrays.copyOf(waveform, waveform.length));
-                bundle.putInt("samplingRate", samplingRate);
-                sendUpdate(bundle);*/
+                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(waveform));
+                Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-                Log.d("CATHACKS", MainActivity.prettyPrintByteArray(fft));
-                /*Log.d("CATHACKS", "I was reached");
-                bundle.putByteArray("fft", Arrays.copyOf(fft, fft.length));
-                bundle.putInt("samplingRate", samplingRate);
-                sendUpdate(bundle);*/
-                mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+                //mAudioFeatureRef.update(mFeatureExtractor.getFeatures(fft));
+                //Log.d("CATHACKS", mAudioFeatureRef.data().toString());
             }
-        }, SAMPLING_RATE, false, true);
+        }, SAMPLING_RATE, true, false);
 
+        //These are all magic values, don't worry about it
+        int sampleSizeInBits = 8;
         TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
-            SAMPLING_RATE,
-            16,
-            TarsosDSPAudioFormat.NOT_SPECIFIED,
-            false,
-            true
+                TarsosDSPAudioFormat.Encoding.PCM_UNSIGNED,
+                SAMPLING_RATE,
+                sampleSizeInBits,
+                1,
+                (sampleSizeInBits + 7) / 8,
+                16,
+                true
         );
 
-        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize());
+        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize(), format);
         mBManager = LocalBroadcastManager.getInstance(this);
         mVis.setEnabled(true);
         Log.d("CATHACKS", "I finished starting");
