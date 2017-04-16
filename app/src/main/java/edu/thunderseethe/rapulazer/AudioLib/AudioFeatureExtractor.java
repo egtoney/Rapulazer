@@ -5,6 +5,8 @@ import be.tarsos.dsp.SilenceDetector;
 import be.tarsos.dsp.pitch.FastYin;
 import be.tarsos.dsp.pitch.PitchDetector;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import be.tarsos.dsp.io.TarsosDSPAudioFormat;
+import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter;
 
 /**
  * Created by Cody on 4/15/2017.
@@ -21,9 +23,12 @@ public class AudioFeatureExtractor {
     private final int buffer_size;
     private int bytes_processed = 0;
 
-    public AudioFeatureExtractor(float sample_rate, int buffer_size) {
+    private TarsosDSPAudioFloatConverter float_converter;
+
+    public AudioFeatureExtractor(float sample_rate, int buffer_size, TarsosDSPAudioFormat audio_format) {
         this.sample_rate = sample_rate;
         this.buffer_size = buffer_size;
+        this.float_converter = TarsosDSPAudioFloatConverter.getConverter(audio_format);
 
         /**
          * Initialize the SilenceDetector
@@ -47,9 +52,10 @@ public class AudioFeatureExtractor {
         this.envelope_detector = new EnvelopeDetector(this.sample_rate);
     }
 
-    public AudioFeatures getFeatures(byte[] buffer) {
+    public AudioFeatures GetFeatures(byte[] buffer) {
         AudioFeatures audio_features = new AudioFeatures();
-        float[] f_buffer = AudioUtil.toFloatArray(buffer);
+        float[] f_buffer = new float[buffer.length];
+        float_converter.toFloatArray(buffer, f_buffer);
         this.bytes_processed += buffer.length;
 
         /**
