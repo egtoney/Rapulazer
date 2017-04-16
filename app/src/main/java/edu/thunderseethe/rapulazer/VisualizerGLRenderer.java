@@ -8,6 +8,7 @@ import android.content.*;
 import java.io.*;
 import java.nio.*;
 import java.nio.IntBuffer;
+import java.util.*;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -19,6 +20,7 @@ import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
  */
 
 public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
+
     private DataRef<AudioFeatures> mDataRef;
 
     public VisualizerGLRenderer(Context context, DataRef<AudioFeatures> mDataRef) {
@@ -145,6 +147,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mMMatrix = new float[16];
     private final float[] mMVPMatrix = new float[16];
     private final Context mContext;
+    private final Random rn_jesus = new Random();
 
     private int mProgram = -1;
     private int muPMatrixHandle = -1;
@@ -158,6 +161,8 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
     private float scale = 0;
     private float angle = 0;
     private float rotation = 0;
+    private float shake_dx = 0;
+    private float shake_dy = 0;
 
     private Cube mCube;
 
@@ -284,7 +289,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         muVMatrixHandle = GLES20.glGetUniformLocation(mProgram, "view_matrix");
         muMMatrixHandle = GLES20.glGetUniformLocation(mProgram, "model_matrix");
 
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 13, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 30, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         GLES20.glUniformMatrix4fv(muVMatrixHandle, 1, false, mVMatrix, 0);
     }
 
@@ -320,22 +325,66 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
         // Compute transformations
         if( delta_time != 0 ) {
-            running_bpm_count += set_bpm * Math.PI * (delta_time / 60e9);
-            scale = (float) (0.9 + 0.1*Math.abs(Math.cos(running_bpm_count)));
+            if( mDataRef.data() != null && mDataRef.data().is_beat ) {
+                running_bpm_count += Math.PI/5;
+                float angle = (float) (2*Math.PI*rn_jesus.nextFloat());
+                float power = 0.5f * rn_jesus.nextFloat();
+                shake_dx += power * Math.cos(angle);
+                shake_dy += power * Math.sin(angle);
+            }
+            if( running_bpm_count > 0 ) {
+                running_bpm_count -= set_bpm * Math.PI * (delta_time / 60e9);
+            }
+            if( shake_dx > 0 ) {
+                shake_dx /= 4;
+            }
+            if( shake_dx < 0 ) {
+                shake_dx /= 4;
+            }
+            if( shake_dy > 0 ) {
+                shake_dy /= 4;
+            }
+            if( shake_dy < 0 ) {
+                shake_dy /= 4;
+            }
+            scale = (float) (0.8 + 0.2*Math.abs(Math.sin(running_bpm_count)));
+            rotation = (float) (13.0*Math.sin(running_bpm_count));
         }
 
         // Transform the scene
         Matrix.setIdentityM(mMMatrix, 0);
-        Matrix.scaleM(mMMatrix, 0, scale, scale, scale);
-        Matrix.rotateM(mMMatrix, 0, rotation, 0, 1, 0);
-        GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
+        Matrix.translateM(mMMatrix, 0, shake_dx, shake_dy, 0);
+//        Matrix.rotateM(mMMatrix, 0, rotation, 0, 1, 0);
+
+        float sections = 4;
+        float scene_width = 10;
+        float scene_height = 10;
+        float left = -scene_width/2;
+        float right = scene_width/2;
+        float top = -scene_height/2;
+        float bottom = scene_height/2;
+        float step_x = scene_width/sections;
+        float step_y = scene_height/sections;
 
         // Draw objects
-        gl.glClearColor(0, 0, 0, 1);
+        float flash = (float) (Math.min(running_bpm_count, 2.0f*Math.PI) / 50.0f*Math.PI);
+        gl.glClearColor(flash, flash, flash, 1);
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        mCube.draw(gl);
-        rotation -= 1f;
 
+        for( float tx=left ; tx<=right ; tx+=step_x ) {
+            Matrix.translateM(mMMatrix, 0, tx, 0, 0);
+            for( float ty=top ; ty<=bottom ; ty+=step_y ) {
+                Matrix.translateM(mMMatrix, 0, 0, ty, 0);
+                Matrix.scaleM(mMMatrix, 0, scale, scale, scale);
+                GLES20.glUniformMatrix4fv(muMMatrixHandle, 1, false, mMMatrix, 0);
+                Matrix.scaleM(mMMatrix, 0, 1/scale, 1/scale, 1/scale);
+                Matrix.translateM(mMMatrix, 0, 0, -ty, 0);
+                mCube.draw(gl);
+            }
+            Matrix.translateM(mMMatrix, 0, -tx, 0, 0);
+        }
+
+        // Check for errors
         int err = gl.glGetError();
         if( err != GLES10.GL_NO_ERROR ) {
             Log.w("OpenGL Error", "Error Code:"+err);
