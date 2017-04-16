@@ -19,9 +19,10 @@ void main() {
     new_position.xy += in_offset.xy;
     gl_Position = projection_matrix * view_matrix * model_matrix * new_position;
 
-    vec3 computed_color = in_color;
-//    if( in_position.z < 0 ) {
-//        computed_color = computed_color * 0.5;
-//    }
-    pass_color = vec4(computed_color, 1);
+    vec4 computed_color = vec4(in_color, 1);
+    if( in_position.z < 0.0 ) {
+        computed_color.rgb *= 0.1;
+        computed_color.a = 0.0;
+    }
+    pass_color = computed_color;
 }

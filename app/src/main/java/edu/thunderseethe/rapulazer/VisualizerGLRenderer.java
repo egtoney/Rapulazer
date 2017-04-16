@@ -44,7 +44,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         private FloatBuffer mVboBuffer;
         private FloatBuffer mVboInstanceBuffer;
         private ByteBuffer  mIboBuffer;
-        private float x=-0.5f, y=-0.5f, z=-0.5f, width=1, height=1, depth=1;
+        private float x=-0.5f, y=-0.5f, z=-0.5f, width=1, height=1, depth=3;
 
         private float vbo_arr[] = {
                 x, y, z,// 1, 0, 0,
@@ -485,7 +485,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
         // Check for errors
         int err = gl.glGetError();
         if( err != GLES10.GL_NO_ERROR ) {
-            Log.w("OpenGL Error", "Error Code:"+err);
+//            Log.w("OpenGL Error", "Error Code:"+err);
         }
 
         gl.glFinish();
