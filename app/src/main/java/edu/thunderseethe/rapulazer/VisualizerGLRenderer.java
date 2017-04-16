@@ -225,6 +225,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
     private int muVMatrixHandle = -1;
     private int muMMatrixHandle = -1;
 
+    private float ratio = 1;
     private float set_fps = 60;
     private float running_bpm_count = 0;
     private float set_bpm = 120;
@@ -369,7 +370,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
 
-        float ratio = (float) width / height;
+        ratio = (float) width / height;
 
         // create a projection matrix from device screen geometry
         Matrix.perspectiveM(mPMatrix, 0, 40.0f, ratio, 0.1f, 10000.0f);
@@ -432,7 +433,7 @@ public class VisualizerGLRenderer implements GLSurfaceView.Renderer {
 
         float sections = MainActivity.BUCKETS;
         float scene_width = 10;
-        float scene_height = 10;
+        float scene_height = 10/ratio;
         float left = -scene_width/2;
         float right = scene_width/2;
         float top = -scene_height/2;
