@@ -38,7 +38,7 @@ out_file_auc = checkpoint_dir + 'AUC.csv'
 with tf.variable_scope('Input'):
     print('Defining input pipeline')
 
-    feat, label, recname = dataset.load_train()
+    feat, label, recname = dataset.load_test()
 
 with tf.variable_scope('Predictor'):
     print('Defining prediction network')
