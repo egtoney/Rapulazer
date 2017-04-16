@@ -1,5 +1,9 @@
 package edu.thunderseethe.rapulazer.AudioLib;
 
+import android.util.Pair;
+
+import java.util.ArrayList;
+
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 
 /**
@@ -8,5 +12,7 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 
 public class AudioFeatures {
     public boolean is_silence;
+    public boolean is_beat;
+    public double sound_pressure_level;
     public PitchDetectionResult pitch_detection_result;
 }
