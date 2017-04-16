@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
     private boolean mBound = false;
     private VisualizerGLRenderer mRenderer;
     private AudioVisualizerService.AudioFeatureBinder mService;
-    public static final int BUCKETS = 32;
+    public static final int BUCKETS = 12;
 
     protected static String prettyPrintByteArray(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
