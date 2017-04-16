@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
         sb.append("[");
         for(byte b : bytes) {
             sb.append(" '");
-            sb.append((int)b);
+            sb.append(Integer.toBinaryString((int)b));
             sb.append("',");
         }
         sb.append(" ]");

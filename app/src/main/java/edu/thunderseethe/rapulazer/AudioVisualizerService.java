@@ -18,6 +18,7 @@ import android.util.Log;
 import java.io.FileDescriptor;
 import java.util.Arrays;
 
+import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatureExtractor;
 import edu.thunderseethe.rapulazer.AudioLib.AudioFeatures;
 
@@ -91,7 +92,15 @@ public class AudioVisualizerService extends IntentService {
             }
         }, SAMPLING_RATE, false, true);
 
-        mFeatureExtractor = new AudioFeatureExtractor(mVis.getSamplingRate(), mVis.getCaptureSize());
+        TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(
+            SAMPLING_RATE,
+            16,
+            TarsosDSPAudioFormat.NOT_SPECIFIED,
+            false,
+            true
+        );
+
+        mFeatureExtractor = new AudioFeatureExtractor(SAMPLING_RATE, mVis.getCaptureSize());
         mBManager = LocalBroadcastManager.getInstance(this);
         mVis.setEnabled(true);
         Log.d("CATHACKS", "I finished starting");
