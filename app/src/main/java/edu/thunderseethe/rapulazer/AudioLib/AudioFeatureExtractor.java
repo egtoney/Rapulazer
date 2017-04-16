@@ -1,18 +1,10 @@
 package edu.thunderseethe.rapulazer.AudioLib;
 
 import android.media.audiofx.Visualizer;
-
-import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.SilenceDetector;
-import be.tarsos.dsp.beatroot.BeatRootOnsetEventHandler;
-import be.tarsos.dsp.io.TarsosDSPAudioFormat;
-import be.tarsos.dsp.io.android.AudioDispatcherFactory;
-import be.tarsos.dsp.onsets.ComplexOnsetDetector;
 import be.tarsos.dsp.pitch.FastYin;
-import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchDetector;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
-import be.tarsos.dsp.beatroot.BeatRootOnsetEventHandler;
 
 /**
  * Created by Cody on 4/15/2017.
@@ -23,6 +15,7 @@ public class AudioFeatureExtractor {
     private SilenceDetector silence_detector;
     private PitchDetector pitch_detector;
     private AndroidComplexOnsetDetector complex_onset_detector;
+    private EnvelopeDetector envelope_detector;
 
     private final float sample_rate;
     private final int buffer_size;
@@ -47,6 +40,11 @@ public class AudioFeatureExtractor {
          * Initialize the ComplexOnsetDetector
          */
         this.complex_onset_detector = new AndroidComplexOnsetDetector(buffer_size);
+
+        /**
+         * Initialize the EnvelopeDetector
+         */
+        this.envelope_detector = new EnvelopeDetector(this.sample_rate);
     }
 
     public AudioFeatures GetFeatures(byte[] buffer, Visualizer visualizer) {
@@ -72,6 +70,11 @@ public class AudioFeatureExtractor {
             audio_features.is_beat = this.complex_onset_detector.isBeat(f_buffer, sample_rate, 0, getTimestamp());
         else
             audio_features.is_beat = false;
+
+        /**
+         * Check the envelope detector
+         */
+        audio_features.average_envelope = envelope_detector.calculateAvergaeEnvelope(f_buffer);
 
         return audio_features;
     }
